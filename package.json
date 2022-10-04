@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babylonjs/core": "^5.26.1",
     "vue": "^3.2.37"
   },
   "devDependencies": {
