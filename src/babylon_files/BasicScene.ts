@@ -1,4 +1,11 @@
-import { Scene, Engine } from '@babylonjs/core';
+import {
+  Scene,
+  Engine,
+  FreeCamera,
+  Vector3,
+  HemisphericLight,
+  MeshBuilder,
+} from '@babylonjs/core';
 
 export class BasicScene {
   scene: Scene;
@@ -13,6 +20,32 @@ export class BasicScene {
   }
 
   createScene(): Scene {
-    return new Scene(this.engine);
+    // create new scene
+    const scene = new Scene(this.engine);
+    // add camera
+    const camera = new FreeCamera('camera', new Vector3(0, 2, -5), scene);
+    camera.attachControl();
+
+    // add light
+    const hemiLight = new HemisphericLight(
+      'hemiLight',
+      new Vector3(0, 1, 0),
+      scene
+    );
+    hemiLight.intensity = 0.5;
+
+    // add ground
+    const ground = MeshBuilder.CreateGround(
+      'ground',
+      {
+        width: 10,
+        height: 10,
+      },
+      scene
+    );
+
+    const ball = MeshBuilder.CreateSphere('ball', { diameter: 1 }, scene);
+    ball.position = new Vector3(0, 1, 0);
+    return scene;
   }
 }
