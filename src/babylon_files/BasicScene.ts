@@ -5,6 +5,9 @@ import {
   Vector3,
   HemisphericLight,
   MeshBuilder,
+  StandardMaterial,
+  Color3,
+  Texture,
 } from '@babylonjs/core';
 
 export class BasicScene {
@@ -44,8 +47,18 @@ export class BasicScene {
       scene
     );
 
-    const ball = MeshBuilder.CreateSphere('ball', { diameter: 1 }, scene);
-    ball.position = new Vector3(0, 1, 0);
+    const groundMaterial = new StandardMaterial('Ground Material', scene);
+
+    groundMaterial.diffuseColor = Color3.White();
+
+    ground.material = groundMaterial;
+
+    const sphere = MeshBuilder.CreateSphere(
+      'sphere',
+      { diameter: 2, segments: 32 },
+      scene
+    );
+    sphere.position = new Vector3(0, 1, 0);
     return scene;
   }
 }
