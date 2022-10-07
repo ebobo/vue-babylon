@@ -26,7 +26,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { BasicScene } from '../babylon_files/BasicScene';
+import { CustomModels } from '../babylon_files/CustomModels';
 // Logo
 import vuefify_logo from '../assets/logo.svg';
 import vue_logo from '../assets/vue.svg';
@@ -45,7 +45,7 @@ export default defineComponent({
 
   mounted() {
     const canvas = document.querySelector('canvas')!;
-    new BasicScene(canvas);
+    new CustomModels(canvas);
   },
 });
 </script>
