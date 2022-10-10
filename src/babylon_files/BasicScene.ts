@@ -13,10 +13,12 @@ import {
 export class BasicScene {
   scene: Scene;
   engine: Engine;
+
   constructor(private canvas: HTMLCanvasElement) {
     this.engine = new Engine(this.canvas, true);
     this.scene = this.createScene();
 
+    // Register a render loop to repeatedly render the scene
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
@@ -28,7 +30,6 @@ export class BasicScene {
     // add camera
     const camera = new FreeCamera('camera', new Vector3(0, 2, -5), scene);
     camera.attachControl();
-
     // add light
     const hemiLight = new HemisphericLight(
       'hemiLight',

@@ -21,6 +21,14 @@
     <v-row align="center" justify="center">
       <canvas></canvas>
     </v-row>
+    <v-row align="center" justify="center">
+      <v-btn text class="mr-4 mt-6" :disabled="switch_on" @click="rotateMesh"
+        >Open</v-btn
+      >
+      <v-btn text class="mt-6" :disabled="!switch_on" @click="rotateMesh"
+        >Close</v-btn
+      >
+    </v-row>
   </v-container>
 </template>
 
@@ -40,12 +48,23 @@ export default defineComponent({
       vue_logo,
       babylon_logo,
       vuefify_logo,
+      switch_on: false,
+      model: null,
     };
   },
 
   mounted() {
     const canvas = document.querySelector('canvas')!;
-    new CustomModels(canvas);
+    this.model = new CustomModels(canvas);
+  },
+
+  methods: {
+    rotateMesh() {
+      if (this.model) {
+        this.switch_on = !this.switch_on;
+        this.model.rotateMeshX(this.switch_on);
+      }
+    },
   },
 });
 </script>
