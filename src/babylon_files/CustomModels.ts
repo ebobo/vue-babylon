@@ -1,3 +1,4 @@
+import { createApp } from 'vue';
 import {
   Scene,
   Engine,
@@ -12,6 +13,8 @@ import {
   SceneLoader,
   AbstractMesh,
   AxesViewer,
+  Color3,
+  CubeTexture,
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
 
@@ -19,11 +22,26 @@ export class CustomModels {
   scene: Scene;
   engine: Engine;
   meshes: AbstractMesh[];
+  redMaterial: StandardMaterial;
+  whiteMaterial: StandardMaterial;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.engine = new Engine(this.canvas, true);
     this.scene = this.createScene();
+    this.createEnvironment();
     this.meshes = [];
+
+    this.whiteMaterial = new StandardMaterial('white');
+    this.whiteMaterial.alpha = 1;
+    this.whiteMaterial.diffuseColor = new Color3(1, 1, 1);
+
+    this.redMaterial = new StandardMaterial('red');
+
+    this.redMaterial.roughness = 0;
+    this.redMaterial.diffuseColor = new Color3(1, 0, 0);
+    this.redMaterial.specularColor = new Color3(0.5, 0, 0);
+    this.redMaterial.ambientColor = new Color3(0.23, 0, 0);
+
     this.importModel();
 
     this.engine.runRenderLoop(() => {
@@ -40,6 +58,8 @@ export class CustomModels {
     // camera.attachControl(true);
 
     scene.clearColor = new Color4(1, 1, 1);
+
+    scene.ambientColor = new Color3(1, 1, 1);
 
     var camera = new ArcRotateCamera(
       'Camera',
@@ -61,7 +81,10 @@ export class CustomModels {
       new Vector3(0, 1, 0),
       scene
     );
-    hemiLight.intensity = 0.5;
+    hemiLight.intensity = 1;
+    hemiLight.diffuse = new Color3(1, 1, 1);
+    hemiLight.specular = new Color3(1, 1, 1);
+    hemiLight.groundColor = new Color3(1, 1, 1);
 
     // add axes
     // const axes = new AxesViewer(scene, 1.5);
@@ -85,6 +108,18 @@ export class CustomModels {
     return scene;
   }
 
+  createEnvironment(): void {
+    if (this.scene) {
+      const envTex = CubeTexture.CreateFromPrefilteredData(
+        './environments/workshop.env',
+        this.scene
+      );
+
+      this.scene.environmentTexture = envTex;
+      this.scene.createDefaultSkybox(envTex, true);
+    }
+  }
+
   async importModel(): Promise<void> {
     const { meshes } = await SceneLoader.ImportMeshAsync(
       '',
@@ -102,6 +137,11 @@ export class CustomModels {
     const baseP2 = meshes[2];
     const knubP1 = meshes[3];
     const knubP2 = meshes[4];
+
+    const indicator = meshes[6];
+
+    indicator.material = this.whiteMaterial;
+
     // axes.xAxis.parent = base;
     // axes.yAxis.parent = base;
     // axes.zAxis.parent = base;
@@ -133,5 +173,13 @@ export class CustomModels {
 
     this.meshes[3].rotation.z += direction ? Math.PI / 2 : -Math.PI / 2;
     this.meshes[4].rotation.z += direction ? Math.PI / 2 : -Math.PI / 2;
+
+    const indicator = this.meshes[6];
+
+    if (direction) {
+      indicator.material = this.redMaterial;
+    } else {
+      indicator.material = this.whiteMaterial;
+    }
   }
 }
