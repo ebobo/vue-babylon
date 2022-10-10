@@ -2,7 +2,6 @@ import { createApp } from 'vue';
 import {
   Scene,
   Engine,
-  FreeCamera,
   ArcRotateCamera,
   Vector3,
   HemisphericLight,
@@ -24,12 +23,14 @@ export class CustomModels {
   meshes: AbstractMesh[];
   redMaterial: StandardMaterial;
   whiteMaterial: StandardMaterial;
+  switchStatus: boolean;
 
   constructor(private canvas: HTMLCanvasElement) {
     this.engine = new Engine(this.canvas, true);
     this.scene = this.createScene();
     this.createEnvironment();
     this.meshes = [];
+    this.switchStatus = false;
 
     this.whiteMaterial = new StandardMaterial('white');
     this.whiteMaterial.alpha = 1;
@@ -139,9 +140,10 @@ export class CustomModels {
     const knubP2 = meshes[4];
 
     const indicator = meshes[6];
-
     indicator.material = this.whiteMaterial;
 
+    knubP1.actionManager?.registerAction();
+    // display object axis
     // axes.xAxis.parent = base;
     // axes.yAxis.parent = base;
     // axes.zAxis.parent = base;
@@ -166,17 +168,18 @@ export class CustomModels {
     // knub.rotation.x -= 0.5;
   }
 
-  rotateMeshX(direction: boolean): void {
+  rotateMeshX(): void {
     // this.meshes.forEach((m) => {
     //   m.rotation.z += direction ? -Math.PI / 2 : Math.PI / 2;
     // });
 
-    this.meshes[3].rotation.z += direction ? Math.PI / 2 : -Math.PI / 2;
-    this.meshes[4].rotation.z += direction ? Math.PI / 2 : -Math.PI / 2;
+    this.switchStatus = !this.switchStatus;
+    this.meshes[3].rotation.z += this.switchStatus ? Math.PI / 2 : -Math.PI / 2;
+    this.meshes[4].rotation.z += this.switchStatus ? Math.PI / 2 : -Math.PI / 2;
 
     const indicator = this.meshes[6];
 
-    if (direction) {
+    if (this.switchStatus) {
       indicator.material = this.redMaterial;
     } else {
       indicator.material = this.whiteMaterial;

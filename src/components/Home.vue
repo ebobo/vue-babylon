@@ -14,7 +14,7 @@
     <v-row class="text-center">
       <v-col class="mb-4">
         <h2 class="display-2 font-weight-bold mb-3">
-          BabylonJS + Vue + Vuetify
+          Blender + BabylonJS + Vue + Vuetify
         </h2>
       </v-col>
     </v-row>
@@ -22,10 +22,10 @@
       <canvas></canvas>
     </v-row>
     <v-row align="center" justify="center">
-      <v-btn text class="mr-4 mt-6" :disabled="switch_on" @click="rotateMesh"
+      <v-btn text class="mr-4 mt-6" :disabled="switchStatus" @click="rotateMesh"
         >Open</v-btn
       >
-      <v-btn text class="mt-6" :disabled="!switch_on" @click="rotateMesh"
+      <v-btn text class="mt-6" :disabled="!switchStatus" @click="rotateMesh"
         >Close</v-btn
       >
     </v-row>
@@ -48,7 +48,6 @@ export default defineComponent({
       vue_logo,
       babylon_logo,
       vuefify_logo,
-      switch_on: false,
       model: null,
     };
   },
@@ -58,11 +57,19 @@ export default defineComponent({
     this.model = new CustomModels(canvas);
   },
 
+  computed: {
+    switchStatus() {
+      if (this.model) {
+        return this.model.switchStatus;
+      }
+      return false;
+    },
+  },
+
   methods: {
     rotateMesh() {
       if (this.model) {
-        this.switch_on = !this.switch_on;
-        this.model.rotateMeshX(this.switch_on);
+        this.model.rotateMeshX();
       }
     },
   },
