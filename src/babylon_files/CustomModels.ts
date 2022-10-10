@@ -14,23 +14,30 @@ import {
   AxesViewer,
   Color3,
   CubeTexture,
+  ExecuteCodeAction,
+  ActionManager,
+  SetValueAction,
 } from '@babylonjs/core';
 import '@babylonjs/loaders';
+import { EventEmitter } from 'events';
 
-export class CustomModels {
+export class CustomModels extends EventEmitter {
   scene: Scene;
   engine: Engine;
   meshes: AbstractMesh[];
+  knubBase: AbstractMesh | null;
   redMaterial: StandardMaterial;
   whiteMaterial: StandardMaterial;
   switchStatus: boolean;
 
   constructor(private canvas: HTMLCanvasElement) {
+    super();
     this.engine = new Engine(this.canvas, true);
     this.scene = this.createScene();
     this.createEnvironment();
     this.meshes = [];
     this.switchStatus = false;
+    this.knubBase = null;
 
     this.whiteMaterial = new StandardMaterial('white');
     this.whiteMaterial.alpha = 1;
@@ -44,7 +51,6 @@ export class CustomModels {
     this.redMaterial.ambientColor = new Color3(0.23, 0, 0);
 
     this.importModel();
-
     this.engine.runRenderLoop(() => {
       this.scene.render();
     });
@@ -142,7 +148,14 @@ export class CustomModels {
     const indicator = meshes[6];
     indicator.material = this.whiteMaterial;
 
-    knubP1.actionManager?.registerAction();
+    // knubP1.actionManager?.registerAction(
+    //   new SetValueAction(
+    //     ActionManager.OnPickDownTrigger,
+    //     knubP1,
+    //     'scaling',
+    //     new Vector3(1.5, 1.5, 1.5)
+    //   )
+    // );
     // display object axis
     // axes.xAxis.parent = base;
     // axes.yAxis.parent = base;
@@ -150,7 +163,7 @@ export class CustomModels {
 
     // console.log(base);
     this.meshes = meshes;
-
+    this.knubBase = knubP1;
     console.log(meshes[1]);
     // this.meshes.forEach((m) => {
     //   console.log(m);
@@ -166,9 +179,22 @@ export class CustomModels {
     // base.rotation.x = Math.PI;
     // base.rotation.x -= 0.5;
     // knub.rotation.x -= 0.5;
+    this.createActions();
   }
 
-  rotateMeshX(): void {
+  createActions(): void {
+    console.log('createActions');
+    if (this.scene && this.knubBase) {
+      this.knubBase.actionManager = new ActionManager(this.scene);
+      this.knubBase.actionManager.registerAction(
+        new ExecuteCodeAction(ActionManager.OnPickDownTrigger, () => {
+          this.rotateSwitch();
+        })
+      );
+    }
+  }
+
+  rotateSwitch(): void {
     // this.meshes.forEach((m) => {
     //   m.rotation.z += direction ? -Math.PI / 2 : Math.PI / 2;
     // });
@@ -184,5 +210,7 @@ export class CustomModels {
     } else {
       indicator.material = this.whiteMaterial;
     }
+
+    this.emit('switchStatus', this.switchStatus);
   }
 }

@@ -22,10 +22,14 @@
       <canvas></canvas>
     </v-row>
     <v-row align="center" justify="center">
-      <v-btn text class="mr-4 mt-6" :disabled="switchStatus" @click="rotateMesh"
+      <v-btn
+        text
+        class="mr-4 mt-6"
+        :disabled="switch_status"
+        @click="rotateMesh"
         >Open</v-btn
       >
-      <v-btn text class="mt-6" :disabled="!switchStatus" @click="rotateMesh"
+      <v-btn text class="mt-6" :disabled="!switch_status" @click="rotateMesh"
         >Close</v-btn
       >
     </v-row>
@@ -49,27 +53,22 @@ export default defineComponent({
       babylon_logo,
       vuefify_logo,
       model: null,
+      switch_status: false,
     };
   },
 
   mounted() {
     const canvas = document.querySelector('canvas')!;
     this.model = new CustomModels(canvas);
-  },
-
-  computed: {
-    switchStatus() {
-      if (this.model) {
-        return this.model.switchStatus;
-      }
-      return false;
-    },
+    this.model.on('switchStatus', (data: boolean) => {
+      this.switch_status = data;
+    });
   },
 
   methods: {
     rotateMesh() {
       if (this.model) {
-        this.model.rotateMeshX();
+        this.model.rotateSwitch();
       }
     },
   },
