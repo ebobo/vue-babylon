@@ -141,8 +141,13 @@ export class CustomModels extends EventEmitter {
     // const axes = new AxesViewer(this.scene, 1);
 
     const baseP1 = meshes[1];
+    baseP1.material = this.createBaseMaterial();
+
     const baseP2 = meshes[2];
+    baseP2.material = this.createPlasticMaterial();
+
     const knubP1 = meshes[3];
+
     const knubP2 = meshes[4];
 
     const indicator = meshes[6];
@@ -164,7 +169,7 @@ export class CustomModels extends EventEmitter {
     // console.log(base);
     this.meshes = meshes;
     this.knubBase = knubP1;
-    console.log(meshes[1]);
+    // console.log(meshes[1]);
     // this.meshes.forEach((m) => {
     //   console.log(m);
     //   m.rotation.z = -Math.PI / 4;
@@ -187,11 +192,66 @@ export class CustomModels extends EventEmitter {
     if (this.scene && this.knubBase) {
       this.knubBase.actionManager = new ActionManager(this.scene);
       this.knubBase.actionManager.registerAction(
-        new ExecuteCodeAction(ActionManager.OnPickDownTrigger, () => {
+        new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, () => {
           this.rotateSwitch();
         })
       );
     }
+  }
+
+  createBaseMaterial(): StandardMaterial {
+    const baseMat = new StandardMaterial('baseMat', this.scene);
+    const diffuseTex = new Texture(
+      './textures/metal/metal_diffuse.jpg',
+      this.scene
+    );
+    baseMat.diffuseTexture = diffuseTex;
+
+    const normalTex = new Texture(
+      './textures/metal/metal_normal.jpg',
+      this.scene
+    );
+
+    baseMat.bumpTexture = normalTex;
+    baseMat.invertNormalMapX = true;
+    baseMat.invertNormalMapY = true;
+
+    const aoTex = new Texture('./textures/metal/metal_ao.jpg', this.scene);
+    baseMat.ambientTexture = aoTex;
+
+    const specTex = new Texture('./textures/metal/metal_spec.jpg', this.scene);
+    baseMat.specularTexture = specTex;
+    baseMat.specularPower = 4;
+    return baseMat;
+  }
+
+  createPlasticMaterial(): StandardMaterial {
+    const plasticMat = new StandardMaterial('plasticMat', this.scene);
+    const diffuseTex = new Texture(
+      './textures/plastic/plastic_diffuse.jpg',
+      this.scene
+    );
+    plasticMat.diffuseTexture = diffuseTex;
+
+    const normalTex = new Texture(
+      './textures/plastic/plastic_normal.jpg',
+      this.scene
+    );
+
+    plasticMat.bumpTexture = normalTex;
+    plasticMat.invertNormalMapX = true;
+    plasticMat.invertNormalMapY = true;
+
+    const aoTex = new Texture('./textures/plastic/plastic_ao.jpg', this.scene);
+    plasticMat.ambientTexture = aoTex;
+
+    const specTex = new Texture(
+      './textures/plastic/plastic_spec.jpg',
+      this.scene
+    );
+    plasticMat.specularTexture = specTex;
+    plasticMat.specularPower = 8;
+    return plasticMat;
   }
 
   rotateSwitch(): void {
