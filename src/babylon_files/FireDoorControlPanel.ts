@@ -21,7 +21,7 @@ import {
 import '@babylonjs/loaders';
 import { EventEmitter } from 'events';
 
-export class CustomModels extends EventEmitter {
+export class FireDoorControlPanel extends EventEmitter {
   scene: Scene;
   engine: Engine;
   meshes: AbstractMesh[];
@@ -77,15 +77,16 @@ export class CustomModels extends EventEmitter {
       scene
     );
     // set the camera position x, y, z axis
-    camera.setPosition(new Vector3(0, -2, 5));
+    camera.setPosition(new Vector3(0, 0, 2));
     camera.attachControl(true);
     camera.speed = 0.01;
+
     // camera.upperBetaLimit = (Math.PI / 2) * 0.99;
 
     // add light
     const hemiLight = new HemisphericLight(
       'hemiLight',
-      new Vector3(0, 1, 0),
+      new Vector3(1, 0, 0),
       scene
     );
     hemiLight.intensity = 1;
@@ -131,20 +132,33 @@ export class CustomModels extends EventEmitter {
     const { meshes } = await SceneLoader.ImportMeshAsync(
       '',
       './models/',
-      'switchAll.glb',
+      'fireDoorControl.glb',
       this.scene
     );
 
     console.log(meshes.length);
     console.log(meshes);
 
+    meshes.forEach((mesh) => {
+      if (mesh.name.includes('Indicator') && mesh.name.includes('primitive1')) {
+        mesh.material = this.whiteMaterial;
+      } else if (
+        mesh.name.includes('BaseZ') &&
+        mesh.name.includes('primitive0')
+      ) {
+        mesh.material = this.createBaseMaterial();
+      } else if (mesh.name.includes('Knub')) {
+        mesh.rotation = new Vector3(0, 0, Math.PI / 4);
+      }
+    });
+
     // const axes = new AxesViewer(this.scene, 1);
 
     const baseP1 = meshes[1];
-    baseP1.material = this.createBaseMaterial();
+    // baseP1.material = this.createBaseMaterial();
 
     const baseP2 = meshes[2];
-    baseP2.material = this.createPlasticMaterial();
+    // baseP2.material = this.createPlasticMaterial();
 
     const knubP1 = meshes[3];
 
@@ -176,8 +190,8 @@ export class CustomModels extends EventEmitter {
     // });
 
     // base.rotation = new Vector3(0, -Math.PI, 0);
-    knubP1.rotation = new Vector3(0, 0, -Math.PI / 4);
-    knubP2.rotation = new Vector3(0, 0, -Math.PI / 4);
+    // knubP1.rotation = new Vector3(0, 0, -Math.PI / 4);
+    // knubP2.rotation = new Vector3(0, 0, -Math.PI / 4);
 
     // knub.position = new Vector3(0, 0, -0.01);
 
@@ -188,6 +202,7 @@ export class CustomModels extends EventEmitter {
   }
 
   createActions(): void {
+    console.log('createActions');
     if (this.scene && this.knubBase) {
       this.knubBase.actionManager = new ActionManager(this.scene);
       this.knubBase.actionManager.registerAction(
