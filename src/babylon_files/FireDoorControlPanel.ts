@@ -148,6 +148,7 @@ export class FireDoorControlPanel extends EventEmitter {
       ) {
         mesh.material = this.createBaseMaterial();
       } else if (mesh.name.includes('Knub')) {
+        //put the knob to initial close position
         mesh.rotation = new Vector3(0, 0, Math.PI / 4);
       }
     });
