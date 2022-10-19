@@ -24,20 +24,27 @@ import { EventEmitter } from 'events';
 export class FireDoorControlPanel extends EventEmitter {
   scene: Scene;
   engine: Engine;
-  meshes: AbstractMesh[];
-  knubBase: AbstractMesh | null;
+  //the black handler part of the knub
+  knubBodys: Map<string, AbstractMesh>;
+  //the white indicator part of the knub
+  knubHeaders: Map<string, AbstractMesh>;
+  //on/off status
+  controlStatus: Map<string, boolean>;
+  //on/off status
+  indicators: Map<string, AbstractMesh>;
+
   redMaterial: StandardMaterial;
   whiteMaterial: StandardMaterial;
-  switchStatus: boolean;
 
   constructor(private canvas: HTMLCanvasElement) {
     super();
     this.engine = new Engine(this.canvas, true);
     this.scene = this.createScene();
     this.createEnvironment();
-    this.meshes = [];
-    this.switchStatus = false;
-    this.knubBase = null;
+    this.knubBodys = new Map();
+    this.knubHeaders = new Map();
+    this.controlStatus = new Map();
+    this.indicators = new Map();
 
     this.whiteMaterial = new StandardMaterial('white');
     this.whiteMaterial.alpha = 1;
@@ -94,25 +101,6 @@ export class FireDoorControlPanel extends EventEmitter {
     hemiLight.specular = new Color3(1, 1, 1);
     hemiLight.groundColor = new Color3(1, 1, 1);
 
-    // add axes
-    // const axes = new AxesViewer(scene, 1.5);
-
-    // add ground
-    // const ground = MeshBuilder.CreateGround(
-    //   'ground',
-    //   {
-    //     width: 10,
-    //     height: 10,
-    //   },
-    //   scene
-    // );
-
-    // const groundMaterial = new StandardMaterial('Ground Material', scene);
-
-    // groundMaterial.diffuseColor = Color3.White();
-
-    // ground.material = groundMaterial;
-
     return scene;
   }
 
@@ -141,77 +129,44 @@ export class FireDoorControlPanel extends EventEmitter {
     meshes.forEach((mesh) => {
       if (mesh.name.includes('Indicator') && mesh.name.includes('primitive1')) {
         mesh.material = this.whiteMaterial;
+        const tag = mesh.name
+          .replace('Indicator', '')
+          .replace('_primitive1', '');
+        this.indicators.set(tag, mesh);
       } else if (
         mesh.name.includes('BaseZ') &&
         mesh.name.includes('primitive0')
       ) {
         mesh.material = this.createBaseMaterial();
-      } else if (mesh.name.includes('KnubZ7')) {
+      } else if (mesh.name.includes('Knub')) {
         //put the knob to initial close position
         //primitive1 is the white part, primitive0 is the black part
-        console.log(mesh);
+        if (mesh.name.includes('primitive0')) {
+          const tag = mesh.name.replace('Knub', '').replace('_primitive0', '');
+          this.knubBodys.set(tag, mesh);
+          this.controlStatus.set(tag, true);
+        } else if (mesh.name.includes('primitive1')) {
+          const tag = mesh.name.replace('Knub', '').replace('_primitive1', '');
+          this.knubHeaders.set(tag, mesh);
+        }
         mesh.rotation = new Vector3(0, 0, Math.PI / 4);
       }
     });
 
-    // const axes = new AxesViewer(this.scene, 1);
-
-    const baseP1 = meshes[1];
-    // baseP1.material = this.createBaseMaterial();
-
-    const baseP2 = meshes[2];
-    // baseP2.material = this.createPlasticMaterial();
-
-    const knubP1 = meshes[3];
-
-    const knubP2 = meshes[4];
-
-    const indicator = meshes[6];
-    indicator.material = this.whiteMaterial;
-
-    // knubP1.actionManager?.registerAction(
-    //   new SetValueAction(
-    //     ActionManager.OnPickDownTrigger,
-    //     knubP1,
-    //     'scaling',
-    //     new Vector3(1.5, 1.5, 1.5)
-    //   )
-    // );
-    // display object axis
-    // axes.xAxis.parent = base;
-    // axes.yAxis.parent = base;
-    // axes.zAxis.parent = base;
-
-    // console.log(base);
-    this.meshes = meshes;
-    this.knubBase = knubP1;
-    // console.log(meshes[1]);
-    // this.meshes.forEach((m) => {
-    //   console.log(m);
-    //   m.rotation.z = -Math.PI / 4;
-    // });
-
-    // base.rotation = new Vector3(0, -Math.PI, 0);
-    // knubP1.rotation = new Vector3(0, 0, -Math.PI / 4);
-    // knubP2.rotation = new Vector3(0, 0, -Math.PI / 4);
-
-    // knub.position = new Vector3(0, 0, -0.01);
-
-    // base.rotation.x = Math.PI;
-    // base.rotation.x -= 0.5;
-    // knub.rotation.x -= 0.5;
     this.createActions();
   }
 
   createActions(): void {
     console.log('createActions');
-    if (this.scene && this.knubBase) {
-      this.knubBase.actionManager = new ActionManager(this.scene);
-      this.knubBase.actionManager.registerAction(
-        new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, () => {
-          this.rotateSwitch();
-        })
-      );
+    if (this.scene && this.knubBodys.size > 0) {
+      this.knubBodys.forEach((mesh, tag) => {
+        mesh.actionManager = new ActionManager(this.scene);
+        mesh.actionManager.registerAction(
+          new ExecuteCodeAction(ActionManager.OnLeftPickTrigger, () => {
+            this.rotateSwitch(tag);
+          })
+        );
+      });
     }
   }
 
@@ -270,23 +225,38 @@ export class FireDoorControlPanel extends EventEmitter {
     return plasticMat;
   }
 
-  rotateSwitch(): void {
-    // this.meshes.forEach((m) => {
-    //   m.rotation.z += direction ? -Math.PI / 2 : Math.PI / 2;
-    // });
+  rotateSwitch(name: string): void {
+    if (!this.controlStatus.has(name)) return;
+    const status = this.controlStatus.get(name);
 
-    this.switchStatus = !this.switchStatus;
-    this.meshes[3].rotation.z += this.switchStatus ? Math.PI / 2 : -Math.PI / 2;
-    this.meshes[4].rotation.z += this.switchStatus ? Math.PI / 2 : -Math.PI / 2;
-
-    const indicator = this.meshes[6];
-
-    if (this.switchStatus) {
-      indicator.material = this.redMaterial;
-    } else {
-      indicator.material = this.whiteMaterial;
+    const body = this.knubBodys.get(name);
+    if (body) {
+      body.rotation.z += status ? -Math.PI / 2 : Math.PI / 2;
+    }
+    const header = this.knubHeaders.get(name);
+    if (header) {
+      header.rotation.z += status ? -Math.PI / 2 : Math.PI / 2;
     }
 
-    this.emit('switchStatus', this.switchStatus);
+    const indicator = this.indicators.get(name);
+    if (indicator) {
+      indicator.material = status ? this.redMaterial : this.whiteMaterial;
+    }
+
+    this.controlStatus.set(name, !status);
+
+    // this.switchStatus = !this.switchStatus;
+    // this.meshes[3].rotation.z += this.switchStatus ? Math.PI / 2 : -Math.PI / 2;
+    // this.meshes[4].rotation.z += this.switchStatus ? Math.PI / 2 : -Math.PI / 2;
+
+    // const indicator = this.meshes[6];
+
+    // if (this.switchStatus) {
+    //   indicator.material = this.redMaterial;
+    // } else {
+    //   indicator.material = this.whiteMaterial;
+    // }
+
+    // this.emit('switchStatus', this.switchStatus);
   }
 }
