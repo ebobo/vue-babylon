@@ -77,7 +77,7 @@ export class FireDoorControlPanel extends EventEmitter {
       scene
     );
     // set the camera position x, y, z axis
-    camera.setPosition(new Vector3(0, 0, 2));
+    camera.setPosition(new Vector3(0, 0, 1.8));
     camera.attachControl(true);
     camera.speed = 0.01;
 
@@ -132,12 +132,11 @@ export class FireDoorControlPanel extends EventEmitter {
     const { meshes } = await SceneLoader.ImportMeshAsync(
       '',
       './models/',
-      'fireDoorControl.glb',
+      'FireDoorControl.glb',
       this.scene
     );
 
     console.log(meshes.length);
-    console.log(meshes);
 
     meshes.forEach((mesh) => {
       if (mesh.name.includes('Indicator') && mesh.name.includes('primitive1')) {
@@ -147,8 +146,10 @@ export class FireDoorControlPanel extends EventEmitter {
         mesh.name.includes('primitive0')
       ) {
         mesh.material = this.createBaseMaterial();
-      } else if (mesh.name.includes('Knub')) {
+      } else if (mesh.name.includes('KnubZ7')) {
         //put the knob to initial close position
+        //primitive1 is the white part, primitive0 is the black part
+        console.log(mesh);
         mesh.rotation = new Vector3(0, 0, Math.PI / 4);
       }
     });
