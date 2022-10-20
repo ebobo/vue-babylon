@@ -120,11 +120,11 @@ export class FireDoorControlPanel extends EventEmitter {
     const { meshes } = await SceneLoader.ImportMeshAsync(
       '',
       './models/',
-      'FireDoorControl.glb',
+      'FireDoorControlWithIcon.glb',
       this.scene
     );
 
-    console.log(meshes.length);
+    // console.log(meshes.length);
 
     meshes.forEach((mesh) => {
       if (mesh.name.includes('Indicator') && mesh.name.includes('primitive1')) {
