@@ -19,19 +19,10 @@
       </v-col>
     </v-row>
     <v-row align="center" justify="center">
-      <canvas></canvas>
+      <canvas class="vessel" id="vessel"></canvas>
     </v-row>
     <v-row align="center" justify="center">
-      <v-btn
-        text
-        class="mr-4 mt-6"
-        :disabled="switch_status"
-        @click="rotateMesh"
-        >Open</v-btn
-      >
-      <v-btn text class="mt-6" :disabled="!switch_status" @click="rotateMesh"
-        >Close</v-btn
-      >
+      <canvas class="control" id="panel"></canvas>
     </v-row>
   </v-container>
 </template>
@@ -39,6 +30,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { FireDoorControlPanel } from '../babylon_files/FireDoorControlPanel';
+import { VesselModel } from '../babylon_files/VesselModel';
 // Logo
 import vuefify_logo from '../assets/logo.svg';
 import vue_logo from '../assets/vue.svg';
@@ -53,16 +45,22 @@ export default defineComponent({
       babylon_logo,
       vuefify_logo,
       model: null,
+      vessel_model: null,
       switch_status: false,
     };
   },
 
   mounted() {
-    const canvas = document.querySelector('canvas')!;
-    this.model = new FireDoorControlPanel(canvas);
+    const panel_canvas = document.getElementById('panel') as HTMLCanvasElement;
+    this.model = new FireDoorControlPanel(panel_canvas);
     this.model.on('switchStatus', (data: boolean) => {
       this.switch_status = data;
     });
+
+    const vessel_canvas = document.getElementById(
+      'vessel'
+    ) as HTMLCanvasElement;
+    this.vessel_model = new VesselModel(vessel_canvas);
   },
 
   methods: {
@@ -76,8 +74,12 @@ export default defineComponent({
 </script>
 
 <style scoped>
-canvas {
+.control {
   width: 100%;
-  height: 80%;
+  height: 50%;
+}
+.vessel {
+  width: 100%;
+  height: 400px;
 }
 </style>
